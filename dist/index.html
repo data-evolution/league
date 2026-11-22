@@ -1,0 +1,301 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#11131a" />
+  <title>League Live Analysis</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap');
+
+    :root {
+      --ink: #12141b;
+      --muted: #6c707c;
+      --line: #e4e3df;
+      --paper: #f4f3ef;
+      --card: #fffefb;
+      --accent: #79d8c8;
+      --accent-dark: #24685d;
+      --yellow: #f3c65c;
+      --red: #d76a55;
+      --blue: #4771db;
+      --purple: #8b6dd6;
+      --shadow: 0 18px 45px rgba(22, 24, 31, .07);
+      font-family: 'Manrope', ui-sans-serif, system-ui, sans-serif;
+      color: var(--ink);
+      background: var(--paper);
+      font-synthesis: none;
+    }
+
+    * { box-sizing: border-box; }
+    body { margin: 0; min-width: 320px; background: var(--paper); }
+    button, input { font: inherit; }
+    button { cursor: pointer; }
+    .shell { display: grid; grid-template-columns: 244px minmax(0, 1fr); min-height: 100vh; }
+    .sidebar { display: flex; flex-direction: column; padding: 28px 18px; color: #fff; background: var(--ink); }
+    .brand { display: flex; align-items: center; gap: 10px; padding: 0 12px 36px; font-size: 16px; font-weight: 800; letter-spacing: -.03em; }
+    .brand-mark { display: grid; width: 31px; height: 31px; place-items: center; border-radius: 9px; color: var(--ink); background: var(--accent); font-size: 14px; font-weight: 800; }
+    .nav-label { margin: 0 12px 10px; color: #858994; font: 500 11px 'DM Mono', monospace; letter-spacing: .12em; text-transform: uppercase; }
+    .nav { display: grid; gap: 5px; }
+    .nav button { display: flex; align-items: center; gap: 11px; width: 100%; padding: 12px; border: 0; border-radius: 9px; color: #aeb0b9; background: transparent; text-align: left; font-size: 13px; font-weight: 600; }
+    .nav button:hover, .nav button.active { color: #fff; background: #252833; }
+    .nav button.active { box-shadow: inset 3px 0 0 var(--accent); }
+    .nav-icon { display: grid; width: 18px; place-items: center; color: currentColor; font-size: 17px; }
+    .sidebar-spacer { flex: 1; }
+    .connection-card { padding: 14px; border: 1px solid #2d303b; border-radius: 11px; background: #191b23; }
+    .connection-card .eyebrow { color: #818590; }
+    .connection-row { display: flex; align-items: center; gap: 8px; margin-top: 9px; font-size: 12px; font-weight: 700; }
+    .live-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--yellow); box-shadow: 0 0 0 3px rgba(243, 198, 92, .15); }
+    .live-dot.connected { background: var(--accent); box-shadow: 0 0 0 3px rgba(121, 216, 200, .15); }
+    .eyebrow { color: var(--muted); font: 500 11px 'DM Mono', monospace; letter-spacing: .08em; text-transform: uppercase; }
+    .main { min-width: 0; padding: 28px clamp(20px, 4vw, 58px) 50px; }
+    .topbar { display: flex; align-items: center; justify-content: space-between; gap: 18px; margin-bottom: 38px; }
+    .topbar-copy { min-width: 0; }
+    .topbar h1 { margin: 5px 0 0; font-size: clamp(26px, 3vw, 39px); line-height: 1.08; letter-spacing: -.065em; }
+    .topbar p { margin: 10px 0 0; color: var(--muted); font-size: 13px; }
+    .actions { display: flex; align-items: center; gap: 9px; }
+    .button { display: inline-flex; align-items: center; gap: 8px; padding: 11px 14px; border: 1px solid var(--line); border-radius: 8px; color: var(--ink); background: var(--card); font-size: 12px; font-weight: 800; transition: transform .16s ease, box-shadow .16s ease; }
+    .button:hover { transform: translateY(-1px); box-shadow: 0 8px 18px rgba(25, 28, 35, .08); }
+    .button.primary { border-color: var(--ink); color: #fff; background: var(--ink); }
+    .button.primary.connected { border-color: var(--accent-dark); background: var(--accent-dark); }
+    .button-icon { font-size: 14px; }
+    .hero-grid { display: grid; grid-template-columns: minmax(0, 1.7fr) minmax(270px, .8fr); gap: 17px; margin-bottom: 17px; }
+    .card { border: 1px solid var(--line); border-radius: 12px; background: var(--card); box-shadow: var(--shadow); }
+    .overview { position: relative; min-height: 229px; overflow: hidden; padding: 25px 27px; }
+    .overview::after { position: absolute; right: 28px; bottom: -44px; width: 205px; height: 205px; border: 1px solid #d9d8d2; border-radius: 50%; content: ''; box-shadow: 0 0 0 23px rgba(217,216,210,.16), 0 0 0 48px rgba(217,216,210,.11); }
+    .overview h2 { max-width: 480px; margin: 10px 0 16px; font-size: clamp(24px, 3vw, 34px); letter-spacing: -.06em; line-height: 1.1; }
+    .overview p { max-width: 470px; margin: 0; color: var(--muted); font-size: 13px; line-height: 1.65; }
+    .overview .tip { position: absolute; right: 29px; bottom: 24px; z-index: 1; color: var(--accent-dark); font: 500 11px 'DM Mono', monospace; }
+    .status-card { padding: 22px; }
+    .status-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
+    .status-badge { display: inline-flex; align-items: center; gap: 7px; padding: 6px 8px; border-radius: 5px; color: #356d63; background: #e3f4ee; font: 500 10px 'DM Mono', monospace; letter-spacing: .05em; text-transform: uppercase; }
+    .status-badge.offline { color: #8a5b52; background: #f7e7e2; }
+    .status-value { margin: 31px 0 2px; font-size: 28px; font-weight: 800; letter-spacing: -.06em; }
+    .status-meta { color: var(--muted); font-size: 12px; }
+    .metrics { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 17px; margin-bottom: 17px; }
+    .metric { padding: 19px 20px; }
+    .metric-value { margin: 10px 0 3px; font-size: 25px; font-weight: 800; letter-spacing: -.06em; }
+    .metric-note { color: var(--muted); font-size: 11px; }
+    .metric-accent { color: var(--accent-dark); }
+    .section-heading { display: flex; align-items: end; justify-content: space-between; gap: 16px; margin: 32px 0 13px; }
+    .section-heading h3 { margin: 0; font-size: 16px; letter-spacing: -.04em; }
+    .section-heading p { margin: 0; color: var(--muted); font-size: 12px; }
+    .analysis-grid { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(320px, .85fr); gap: 17px; }
+    .chart-card, .roster-card { min-width: 0; padding: 21px; }
+    .card-title { display: flex; justify-content: space-between; align-items: baseline; gap: 15px; margin-bottom: 20px; }
+    .card-title h4 { margin: 0; font-size: 14px; letter-spacing: -.025em; }
+    .card-title span { color: var(--muted); font: 500 10px 'DM Mono', monospace; text-transform: uppercase; }
+    .chart-wrap { height: 176px; padding-top: 8px; }
+    .chart { display: flex; align-items: end; gap: 8px; height: 100%; padding: 0 0 22px; border-bottom: 1px solid var(--line); background: repeating-linear-gradient(to bottom, transparent 0, transparent 43px, #eeeeeb 44px); }
+    .bar-group { display: flex; flex: 1; align-items: end; justify-content: center; gap: 3px; height: 100%; position: relative; }
+    .bar { width: min(13px, 38%); min-height: 3px; border-radius: 3px 3px 0 0; background: var(--accent); }
+    .bar.secondary { background: #d8d8d3; }
+    .bar-label { position: absolute; bottom: -22px; color: var(--muted); font: 500 10px 'DM Mono', monospace; }
+    .legend { display: flex; gap: 16px; margin-top: 15px; color: var(--muted); font-size: 11px; }
+    .legend span { display: inline-flex; align-items: center; gap: 6px; }
+    .legend i { width: 7px; height: 7px; border-radius: 2px; background: var(--accent); }
+    .legend i.gray { background: #d8d8d3; }
+    .roster { display: grid; gap: 2px; }
+    .player { display: grid; grid-template-columns: 29px minmax(0, 1fr) auto auto; align-items: center; gap: 9px; padding: 9px 0; border-bottom: 1px solid #efeee9; }
+    .player:last-child { border-bottom: 0; }
+    .avatar { display: grid; width: 29px; height: 29px; place-items: center; border-radius: 8px; color: #fff; background: var(--blue); font-size: 10px; font-weight: 800; }
+    .avatar.red { background: var(--red); }
+    .avatar.purple { background: var(--purple); }
+    .player-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; font-weight: 800; }
+    .player-champ { margin-top: 2px; overflow: hidden; color: var(--muted); text-overflow: ellipsis; white-space: nowrap; font-size: 10px; }
+    .player-kda { font: 500 11px 'DM Mono', monospace; }
+    .player-side { color: var(--muted); font: 500 9px 'DM Mono', monospace; text-transform: uppercase; }
+    .insight-card { display: grid; grid-template-columns: 44px 1fr auto; align-items: center; gap: 15px; padding: 16px 20px; border-color: #d5ebe6; background: #e8f6f1; }
+    .insight-icon { display: grid; width: 42px; height: 42px; place-items: center; border-radius: 11px; color: var(--accent-dark); background: var(--accent); font-size: 21px; }
+    .insight-card h4 { margin: 0 0 4px; font-size: 13px; }
+    .insight-card p { margin: 0; color: #56756f; font-size: 11px; line-height: 1.5; }
+    .insight-score { color: var(--accent-dark); font: 500 12px 'DM Mono', monospace; }
+    .empty { display: grid; min-height: 150px; place-items: center; padding: 24px; color: var(--muted); text-align: center; font-size: 12px; line-height: 1.6; }
+    .hidden { display: none !important; }
+    .toast { position: fixed; right: 20px; bottom: 20px; z-index: 5; max-width: min(380px, calc(100vw - 40px)); padding: 12px 15px; border: 1px solid var(--line); border-radius: 8px; color: var(--ink); background: var(--card); box-shadow: var(--shadow); font-size: 12px; }
+    .modal-backdrop { position: fixed; inset: 0; z-index: 4; display: grid; place-items: center; padding: 20px; background: rgba(18,20,27,.48); }
+    .modal { width: min(520px, 100%); padding: 24px; border-radius: 12px; background: var(--card); box-shadow: 0 25px 80px rgba(0,0,0,.25); }
+    .modal h3 { margin: 0 0 8px; font-size: 19px; letter-spacing: -.04em; }
+    .modal p { margin: 0 0 18px; color: var(--muted); font-size: 12px; line-height: 1.6; }
+    .input-label { display: block; margin-bottom: 7px; color: var(--muted); font: 500 10px 'DM Mono', monospace; letter-spacing: .06em; text-transform: uppercase; }
+    .input { width: 100%; padding: 12px 13px; border: 1px solid var(--line); border-radius: 7px; outline: none; color: var(--ink); background: #faf9f5; font: 12px 'DM Mono', monospace; }
+    .input:focus { border-color: var(--accent-dark); box-shadow: 0 0 0 3px rgba(121,216,200,.2); }
+    .modal-actions { display: flex; justify-content: flex-end; gap: 9px; margin-top: 18px; }
+    @media (max-width: 950px) { .shell { grid-template-columns: 70px minmax(0,1fr); } .sidebar { padding: 20px 10px; } .brand { justify-content: center; padding: 0 0 32px; } .brand span, .nav-label, .nav button span, .connection-card { display: none; } .nav button { justify-content: center; padding: 13px; } .nav-icon { font-size: 19px; } }
+    @media (max-width: 720px) { .main { padding: 22px 15px 36px; } .topbar { align-items: flex-start; flex-direction: column; margin-bottom: 28px; } .hero-grid, .analysis-grid { grid-template-columns: 1fr; } .metrics { grid-template-columns: repeat(2, 1fr); } .actions { width: 100%; } .actions .button { flex: 1; justify-content: center; } .overview { min-height: 245px; } .overview::after { right: -20px; } .insight-card { grid-template-columns: 40px 1fr; } .insight-score { grid-column: 2; } }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <aside class="sidebar">
+      <div class="brand"><div class="brand-mark">L</div><span>League / Live</span></div>
+      <p class="nav-label">Workspace</p>
+      <nav class="nav" aria-label="Primary navigation">
+        <button class="active" type="button"><span class="nav-icon">⌂</span><span>Overview</span></button>
+        <button type="button" data-scroll="roster-section"><span class="nav-icon">◈</span><span>Players</span></button>
+        <button type="button" data-scroll="analysis-section"><span class="nav-icon">◌</span><span>Analysis</span></button>
+      </nav>
+      <div class="sidebar-spacer"></div>
+      <div class="connection-card">
+        <p class="eyebrow">Local client</p>
+        <div class="connection-row"><i class="live-dot" id="side-dot"></i><span id="side-status">Not connected</span></div>
+      </div>
+    </aside>
+    <main class="main">
+      <header class="topbar">
+        <div class="topbar-copy">
+          <p class="eyebrow">Live game intelligence / 01</p>
+          <h1>See the game<br />between the fights.</h1>
+          <p>Turn your League client data into a calmer, more useful read of the map.</p>
+        </div>
+        <div class="actions">
+          <button class="button" id="settings-btn" type="button"><span class="button-icon">⚙</span> Endpoint</button>
+          <button class="button primary" id="connect-btn" type="button"><span class="button-icon">↻</span> Connect</button>
+        </div>
+      </header>
+
+      <section class="hero-grid" aria-label="Game overview">
+        <div class="card overview">
+          <p class="eyebrow">Current read</p>
+          <h2 id="overview-title">Your next decision is<br />probably on the minimap.</h2>
+          <p id="overview-copy">Connect to the Live Client Data API to surface tempo, lane pressure, and the players shaping this game.</p>
+          <span class="tip" id="overview-tip">waiting for signal</span>
+        </div>
+        <div class="card status-card">
+          <div class="status-head"><p class="eyebrow">Session status</p><span class="status-badge offline" id="status-badge"><i class="live-dot"></i> Offline</span></div>
+          <div class="status-value" id="status-value">No game found</div>
+          <div class="status-meta" id="status-meta">Endpoint has not been polled yet</div>
+        </div>
+      </section>
+
+      <section class="metrics" aria-label="Key metrics">
+        <div class="card metric"><p class="eyebrow">Game time</p><div class="metric-value" id="game-time">—</div><div class="metric-note">elapsed since start</div></div>
+        <div class="card metric"><p class="eyebrow">Players</p><div class="metric-value" id="player-count">—</div><div class="metric-note">visible in live client</div></div>
+        <div class="card metric"><p class="eyebrow">Your champion</p><div class="metric-value metric-accent" id="champion-name">—</div><div class="metric-note" id="champion-note">waiting for data</div></div>
+        <div class="card metric"><p class="eyebrow">Map</p><div class="metric-value" id="map-name">—</div><div class="metric-note" id="map-note">game environment</div></div>
+      </section>
+
+      <section id="analysis-section">
+        <div class="section-heading"><div><h3>Momentum & pressure</h3><p>Simple signals from the data your client already exposes.</p></div><p class="eyebrow" id="updated-at">Not updated</p></div>
+        <div class="analysis-grid">
+          <div class="card chart-card">
+            <div class="card-title"><h4>Team composition</h4><span>Blue / red side</span></div>
+            <div class="chart-wrap"><div class="chart" id="composition-chart"></div></div>
+            <div class="legend"><span><i></i> blue side</span><span><i class="gray"></i> red side</span></div>
+          </div>
+          <div class="card roster-card" id="roster-section">
+            <div class="card-title"><h4>Players in the lobby</h4><span id="roster-count">0 detected</span></div>
+            <div class="roster" id="roster"><div class="empty">Connect to the local client to see<br />champions, roles, and KDA.</div></div>
+          </div>
+        </div>
+      </section>
+
+      <div class="section-heading"><div><h3>One useful thing</h3><p>A small nudge, based on what is visible right now.</p></div></div>
+      <section class="card insight-card" aria-label="Live insight"><div class="insight-icon">⌁</div><div><h4 id="insight-title">Start with the shape of the game.</h4><p id="insight-copy">Once connected, the dashboard will translate the raw payload into a quick read you can act on.</p></div><div class="insight-score" id="insight-score">signal / —</div></section>
+    </main>
+  </div>
+
+  <div class="modal-backdrop hidden" id="settings-modal" role="dialog" aria-modal="true" aria-labelledby="settings-title">
+    <div class="modal"><h3 id="settings-title">Connect to your client</h3><p>The page polls this endpoint every five seconds. For a local-only setup, serve this page from your machine so the browser can reach <span id="endpoint-hint">127.0.0.1:2999</span>.</p><label class="input-label" for="endpoint-input">Live Client Data URL</label><input class="input" id="endpoint-input" value="https://127.0.0.1:2999/liveclientdata/allgamedata" spellcheck="false" /><div class="modal-actions"><button class="button" id="demo-btn" type="button">Load demo</button><button class="button" id="cancel-btn" type="button">Cancel</button><button class="button primary" id="save-btn" type="button">Save & connect</button></div></div>
+  </div>
+  <div class="toast hidden" id="toast" role="status"></div>
+
+  <script>
+    const DEFAULT_ENDPOINT = 'https://127.0.0.1:2999/liveclientdata/allgamedata';
+    let endpoint = localStorage.getItem('league-endpoint') || DEFAULT_ENDPOINT;
+    let pollTimer;
+
+    const demoData = {
+      gameData: { gameTime: 842, mapName: 'Summoner\'s Rift', gameMode: 'CLASSIC' },
+      activePlayer: { summonerName: 'You', championName: 'Ahri', level: 8, scores: { kills: 4, deaths: 1, assists: 5, creepScore: 78 } },
+      allPlayers: [
+        { summonerName: 'You', championName: 'Ahri', team: 'ORDER', scores: { kills: 4, deaths: 1, assists: 5, creepScore: 78 } },
+        { summonerName: 'Briar mains', championName: 'Briar', team: 'ORDER', scores: { kills: 2, deaths: 2, assists: 4, creepScore: 65 } },
+        { summonerName: 'Riverlight', championName: 'Jinx', team: 'ORDER', scores: { kills: 3, deaths: 2, assists: 3, creepScore: 81 } },
+        { summonerName: 'Ward enjoyer', championName: 'Thresh', team: 'ORDER', scores: { kills: 0, deaths: 3, assists: 8, creepScore: 14 } },
+        { summonerName: 'Topside', championName: 'Gnar', team: 'ORDER', scores: { kills: 1, deaths: 2, assists: 2, creepScore: 70 } },
+        { summonerName: 'Red Horizon', championName: 'Aatrox', team: 'CHAOS', scores: { kills: 2, deaths: 3, assists: 1, creepScore: 74 } },
+        { summonerName: 'Nocturne IRL', championName: 'Nocturne', team: 'CHAOS', scores: { kills: 2, deaths: 3, assists: 3, creepScore: 55 } },
+        { summonerName: 'Late game', championName: 'Corki', team: 'CHAOS', scores: { kills: 1, deaths: 2, assists: 2, creepScore: 77 } },
+        { summonerName: 'Bot lane', championName: 'Kai\'Sa', team: 'CHAOS', scores: { kills: 1, deaths: 1, assists: 1, creepScore: 84 } },
+        { summonerName: 'The lantern', championName: 'Leona', team: 'CHAOS', scores: { kills: 1, deaths: 1, assists: 4, creepScore: 11 } }
+      ]
+    };
+
+    const $ = (id) => document.getElementById(id);
+    const escapeHtml = (str) => String(str ?? '').replace(/[&<>'"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[c]));
+    const initials = (name) => String(name || '?').split(/\s+/).map((part) => part[0]).join('').slice(0, 2).toUpperCase();
+    const formatTime = (seconds) => { const s = Math.max(0, Math.floor(Number(seconds) || 0)); return `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`; };
+    const showToast = (message) => { const el = $('toast'); el.textContent = message; el.classList.remove('hidden'); clearTimeout(showToast.timer); showToast.timer = setTimeout(() => el.classList.add('hidden'), 4200); };
+
+    function render(data, isDemo = false) {
+      const players = Array.isArray(data?.allPlayers) ? data.allPlayers : [];
+      const game = data?.gameData || {};
+      const active = data?.activePlayer || {};
+      const score = active.scores || {};
+      const team = active.team || players.find((p) => p.summonerName === active.summonerName)?.team || 'ORDER';
+      const blue = players.filter((p) => p.team === 'ORDER');
+      const red = players.filter((p) => p.team === 'CHAOS');
+      const totalKills = (side) => side.reduce((sum, p) => sum + Number(p.scores?.kills || 0), 0);
+      $('game-time').textContent = formatTime(game.gameTime);
+      $('player-count').textContent = players.length ? `${players.length}/10` : '—';
+      $('champion-name').textContent = active.championName || '—';
+      $('champion-note').textContent = active.summonerName ? `${active.summonerName} · level ${active.level || '—'}` : 'waiting for data';
+      $('map-name').textContent = (game.mapName || '—').replace("Summoner's Rift", 'Rift');
+      $('map-note').textContent = game.gameMode || 'game environment';
+      $('status-value').textContent = isDemo ? 'Demo signal' : 'Live game found';
+      $('status-meta').textContent = `${game.gameMode || 'CLASSIC'} · ${game.mapName || 'Summoner\'s Rift'}`;
+      $('overview-title').innerHTML = team === 'ORDER' ? 'Your team has<br />the first move.' : 'Read the map<br />before the fight.';
+      $('overview-copy').textContent = `${active.championName || 'Your champion'} is online at ${formatTime(game.gameTime)}. You are sitting at ${score.kills || 0}/${score.deaths || 0}/${score.assists || 0}; use the next clear wave to make the map smaller for the other team.`;
+      $('overview-tip').textContent = isDemo ? 'demo signal' : 'live signal';
+      $('insight-title').textContent = totalKills(blue) >= totalKills(red) ? 'Blue side owns the early tempo.' : 'The game is asking for patience.';
+      $('insight-copy').textContent = `${totalKills(blue)}–${totalKills(red)} in visible kills. ${totalKills(blue) >= totalKills(red) ? 'Convert the lead into vision around the next objective.' : 'Trade farm and information until the next clean window appears.'}`;
+      $('insight-score').textContent = `signal / ${Math.min(99, 55 + Math.abs(totalKills(blue) - totalKills(red)) * 7)}`;
+      $('roster-count').textContent = `${players.length} detected`;
+      $('updated-at').textContent = `Updated ${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+      $('composition-chart').innerHTML = players.length ? players.map((player, index) => { const kills = Number(player.scores?.kills || 0); const height = Math.min(94, 21 + kills * 12 + ((index * 7) % 14)); return `<div class="bar-group"><div class="bar${player.team === 'CHAOS' ? ' secondary' : ''}" style="height:${height}%"></div><span class="bar-label">${index + 1}</span></div>`; }).join('') : '<div class="empty">No composition signal yet.</div>';
+      $('roster').innerHTML = players.length ? players.map((player, index) => { const s = player.scores || {}; const kda = `${s.kills || 0}/${s.deaths || 0}/${s.assists || 0}`; return `<div class="player"><div class="avatar ${player.team === 'CHAOS' ? 'red' : index === 2 ? 'purple' : ''}">${initials(player.summonerName)}</div><div><div class="player-name">${escapeHtml(player.summonerName || 'Unknown')}</div><div class="player-champ">${escapeHtml(player.championName || 'Unknown champion')} · ${s.creepScore || 0} CS</div></div><div class="player-kda">${kda}</div><div class="player-side">${player.team === 'CHAOS' ? 'Red' : 'Blue'}</div></div>`; }).join('') : '<div class="empty">Connect to the local client to see<br />champions, roles, and KDA.</div>';
+      setConnected(true, isDemo ? 'Demo data' : 'Connected');
+    }
+
+    function setConnected(connected, label) {
+      $('status-badge').className = `status-badge${connected ? '' : ' offline'}`;
+      $('status-badge').innerHTML = `<i class="live-dot${connected ? ' connected' : ''}"></i> ${connected ? 'Online' : 'Offline'}`;
+      $('side-dot').className = `live-dot${connected ? ' connected' : ''}`;
+      $('side-status').textContent = label || (connected ? 'Connected' : 'Not connected');
+      $('connect-btn').classList.toggle('connected', connected);
+    }
+
+    async function connect({ silent = false } = {}) {
+      $('connect-btn').disabled = true;
+      $('connect-btn').innerHTML = '<span class="button-icon">…</span> Connecting';
+      try {
+        const response = await fetch(endpoint, { cache: 'no-store' });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        render(await response.json());
+        if (!silent) showToast('Live client connected. Polling every five seconds.');
+      } catch (error) {
+        setConnected(false, 'Connection failed');
+        $('status-value').textContent = 'No game found';
+        $('status-meta').textContent = error.message.includes('Failed to fetch') ? 'Browser could not reach the local endpoint' : error.message;
+        $('overview-tip').textContent = 'waiting for signal';
+        if (!silent) showToast('Could not reach the local client. Check the endpoint and HTTPS certificate.');
+      } finally {
+        $('connect-btn').disabled = false;
+        $('connect-btn').innerHTML = '<span class="button-icon">↻</span> Connect';
+      }
+    }
+
+    function openSettings() { $('endpoint-input').value = endpoint; $('settings-modal').classList.remove('hidden'); $('endpoint-input').focus(); }
+    function closeSettings() { $('settings-modal').classList.add('hidden'); }
+    $('settings-btn').addEventListener('click', openSettings);
+    $('cancel-btn').addEventListener('click', closeSettings);
+    $('save-btn').addEventListener('click', () => { endpoint = $('endpoint-input').value.trim() || DEFAULT_ENDPOINT; localStorage.setItem('league-endpoint', endpoint); closeSettings(); connect(); });
+    $('demo-btn').addEventListener('click', () => { closeSettings(); render(demoData, true); showToast('Loaded demo data. Connect anytime to replace it with your live game.'); });
+    $('connect-btn').addEventListener('click', () => connect());
+    document.querySelectorAll('[data-scroll]').forEach((button) => button.addEventListener('click', () => $(button.dataset.scroll).scrollIntoView({ behavior: 'smooth', block: 'start' })));
+    setConnected(false, 'Not connected');
+    pollTimer = setInterval(() => connect({ silent: true }), 5000);
+  </script>
+</body>
+</html>
