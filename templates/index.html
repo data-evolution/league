@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#10131a">
+  <title>League Live Analysis</title>
+  <link rel="stylesheet" charset="utf-8" href="{{ url_for('static', filename='css/app.css', v='utf8-2') }}">
+  <link rel="stylesheet" charset="utf-8" href="{{ url_for('static', filename='css/game.css', v='utf8-2') }}">
+  <link rel="stylesheet" charset="utf-8" href="{{ url_for('static', filename='css/recommendations.css', v='utf8-2') }}">
+  <link rel="stylesheet" charset="utf-8" href="{{ url_for('static', filename='css/dark.css', v='kda-fit-3') }}">
+</head>
+<body>
+  <div class="app-shell">
+    <main class="main" id="overview">
+      <section class="hero-grid">
+        <div class="panel overview-card gold-card">
+          <div class="gold-heading"><div class="eyebrow">Read the map · Item gold estimate</div><span id="gold-difference">Waiting for data</span></div>
+          <div class="gold-values"><div>Your team <strong id="gold-allies">—</strong></div><div>Enemy team <strong id="gold-enemies">—</strong></div></div>
+          <div class="gold-track" aria-hidden="true"><i id="gold-share"></i></div>
+          <div class="gold-objectives" id="gold-objectives">Your objectives: turrets — · inhibitors —</div>
+        </div>
+        <div class="panel objective-card" id="objective-card"><div class="eyebrow">My map impact &middot; K/A</div><div class="objective-stat"><span>Turrets</span><strong id="objective-turrets">0/0</strong></div><div class="objective-stat"><span>Dragons</span><strong id="objective-dragons">0/0</strong></div><div class="objective-stat"><span>Inhibitors</span><strong id="objective-inhibitors">0/0</strong></div></div>
+        <div class="panel status-card"><div class="eyebrow">Session status</div><div class="status-value" id="session-status">Not connected</div><div class="status-meta" id="session-meta">/api/live has not been polled yet</div><div class="status-line"><span id="patch-label">Patch —</span><span id="game-mode">—</span></div></div>
+      </section>
+
+      <section class="metrics" aria-label="Game metrics">
+        <article class="panel metric"><div class="eyebrow">Game time</div><strong id="game-time">—</strong><span>elapsed</span></article>
+        <article class="panel metric"><div class="eyebrow">Your champion</div><strong id="champion-name">—</strong><span id="champion-level">level —</span></article>
+        <article class="panel metric"><div class="eyebrow">K / D / A</div><strong id="kda">—</strong><span id="cs">— CS</span></article>
+        <article class="panel metric"><div class="eyebrow">Team kills</div><strong id="team-kills">—</strong><span id="enemy-kills">enemy —</span></article>
+      </section>
+
+      <section id="targets">
+        <div class="section-heading"><div><h3>Target board</h3><p>Simple pace checks for the parts you can still influence.</p></div><span class="eyebrow">live targets</span></div>
+        <div class="tracker-grid">
+          <article class="panel tracker"><div class="tracker-head"><div class="eyebrow">CS pace</div><span id="cs-state">waiting</span></div><strong id="cs-target-value">—</strong><div class="bar"><i id="cs-bar"></i></div><div class="tracker-foot"><span id="cs-target-detail">—</span><span>7.0 / min</span></div></article>
+          <article class="panel tracker"><div class="tracker-head"><div class="eyebrow">Level</div><span id="level-state">waiting</span></div><strong id="level-target-value">—</strong><div class="bar"><i id="level-bar"></i></div><div class="tracker-foot"><span id="level-target-detail">—</span><span>target 18</span></div></article>
+          <article class="panel tracker"><div class="tracker-head"><div class="eyebrow">Death budget</div><span id="death-state">waiting</span></div><strong id="death-target-value">—</strong><div class="bar"><i id="death-bar"></i></div><div class="tracker-foot"><span id="death-target-detail">—</span><span>5 max</span></div></article>
+          <article class="panel tracker"><div class="tracker-head"><div class="eyebrow">Kill participation</div><span id="kp-state">waiting</span></div><strong id="kp-target-value">—</strong><div class="bar"><i id="kp-bar"></i></div><div class="tracker-foot"><span id="kp-target-detail">—</span><span>target 65%</span></div></article>
+          <article class="panel tracker"><div class="tracker-head"><div class="eyebrow">Ward score</div><span id="ward-state">waiting</span></div><strong id="ward-target-value">—</strong><div class="bar"><i id="ward-bar"></i></div><div class="tracker-foot"><span id="ward-target-detail">—</span><span>1.5 / min</span></div></article>
+        </div>
+      </section>
+
+      <section class="content-grid" id="players">
+        <div class="panel roster-panel"><div class="panel-heading"><h3>Lane matchups</h3><span id="roster-count">0 detected</span></div><div class="roster-teams"><span id="ally-team-label">Your team</span><span id="enemy-team-label">Enemy team</span></div><div class="roster" id="roster"><div class="empty">Waiting for live client data.</div></div></div>
+        <div class="panel active-panel"><div class="panel-heading"><h3 id="active-title">Active player</h3><span id="item-patch">Data Dragon —</span></div><div class="active-summary"><img id="champion-icon" alt="" class="champion-icon hidden"><div><div class="eyebrow" id="active-role">—</div><h3 id="active-champion">—</h3><p id="active-stats">Connect to see stats.</p></div></div><div class="items" id="items"></div><div class="abilities" id="abilities"></div><div class="recommendation-block"><div class="panel-heading"><h3>Counter-build</h3><span id="enemy-profile">enemy comp —</span></div><div class="recommendations" id="recommendations"><div class="empty">Recommendations will appear once the enemy roster is available.</div></div></div></div>
+      </section>
+
+      <section class="content-grid lower-grid" id="events">
+        <div class="panel events-panel"><div class="panel-heading"><h3>Recent events</h3><span id="event-count">0 events</span></div><div id="events-list" class="events-list"><div class="empty">Events will appear here.</div></div></div>
+        <div class="panel objectives-panel"><div class="panel-heading"><h3>Map pressure</h3><span>from events</span></div><div class="objective-row"><span>Turrets</span><strong id="turret-count">—</strong></div><div class="objective-row"><span>Dragons</span><strong id="dragon-count">—</strong></div><div class="objective-row"><span>Inhibitors</span><strong id="inhibitor-count">—</strong></div><div class="objective-row"><span>Last result</span><strong id="game-result">—</strong></div></div>
+      </section>
+      <footer>Local Flask app · Riot Live Client Data API + Data Dragon</footer>
+    </main>
+  </div>
+  <script charset="utf-8" src="{{ url_for('static', filename='js/app.js', v='team-ranks-2') }}"></script>
+</body>
+</html>

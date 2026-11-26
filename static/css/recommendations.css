@@ -1,0 +1,15 @@
+.recommendation-block { margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--line); }
+.recommendation-block .panel-heading { margin-bottom: 7px; }
+.recommendation-block .panel-heading h3 { font-size: 13px; }
+.recommendations { display: grid; gap: 5px; }
+.recommendation { display: grid; grid-template-columns: 28px minmax(0, 1fr); align-items: center; gap: 8px; padding: 6px 0; }
+.recommendation img { width: 28px; height: 28px; border-radius: 6px; object-fit: cover; background: #e9e8e2; }
+.recommendation-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 10px; font-weight: 800; }
+.recommendation-reason { margin-top: 2px; overflow: hidden; color: var(--muted); text-overflow: ellipsis; white-space: nowrap; font-size: 9px; }
+@media (min-width: 1100px) and (min-height: 760px) {
+  .recommendation-block { margin-top: 7px; padding-top: 7px; }
+  .recommendation { padding: 4px 0; }
+  .recommendation img { width: 24px; height: 24px; }
+  .recommendation-name { font-size: 9px; }
+  .recommendation-reason { font-size: 8px; }
+}
