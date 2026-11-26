@@ -5,6 +5,8 @@ NA ranks, champion stats, estimated team gold, objective participation, and
 counter-build suggestions. It polls every two seconds and shows demo data when
 no live game is available.
 
+![League Live Analysis dashboard screenshot](static/img/Screenshot%202026-11-26%20123533.png)
+
 ## Run locally
 
 Install Python 3.10+ and run from the repository directory in PowerShell:
