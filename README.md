@@ -68,6 +68,6 @@ Gold and build recommendations are estimates based on the available live data.
 
 ## License
 
-Copyright (c) 2026 Data Evolution. Source code is licensed under the
+Copyright (c) 2026 [Data Evolution](https://data-evolution.net/). Source code is licensed under the
 [MIT License](LICENSE). Riot Games names, artwork, and game data remain the
 property of their respective owners.
